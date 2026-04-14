@@ -1,0 +1,8 @@
+Flask==2.1.1
+flask-login==0.6.2
+flask-dance==7.0.0
+anthropic==0.25.0
+requests==2.31.0
+python-dotenv==0.20.0
+gunicorn==20.1.0
+Werkzeug==2.0.3
