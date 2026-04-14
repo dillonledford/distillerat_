@@ -85,7 +85,7 @@ def index():
             contents=prompt,
             config={"system_instruction": system_instruction}
         )
-        output = response.text
+        output = markdown.markdown(response.text)
     return render_template("index.html", output=output)
 
 @app.route('/dashboard')
