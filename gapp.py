@@ -124,7 +124,7 @@ def fetch():
                 contents=combined,
                 config={"system_instruction": PROMPTS[mode]}
             )
-            output = response.text
+            output = markdown.markdown(response.text)
         else:
             output = "No releases found in that timeframe."
     return render_template("fetch.html", output=output)
