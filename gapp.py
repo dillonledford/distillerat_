@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from system_prompts import PROMPTS
 import feedparser
 from datetime import datetime, timedelta, timezone
+import markdown
 
 load_dotenv()
 
