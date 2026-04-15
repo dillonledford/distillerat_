@@ -131,7 +131,8 @@ def figma():
         token = os.getenv("FIGMA_ACCESS_TOKEN")
         content = fetch_figma(file_id, token)
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            # change model when usage is exceeded
+            model="gemini-2.5-flash",
             contents=content,
             config={"system_instruction": PROMPTS[mode]}
         )
@@ -147,7 +148,8 @@ def index():
         mode = request.form.get("mode", "synthesize")
         system_instruction = PROMPTS[mode]
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            # change model when usage is exceeded
+            model="gemini-2.5-flash",
             contents=prompt,
             config={"system_instruction": system_instruction}
         )
@@ -185,7 +187,8 @@ def fetch():
         if items:
             combined = "\n\n".join(items)
             response = client.models.generate_content(
-                model="gemini-2.5-flash-lite",
+                # change model when usage is exceeded
+                model="gemini-2.5-flash",
                 contents=combined,
                 config={"system_instruction": PROMPTS[mode]}
             )
