@@ -1,5 +1,8 @@
 import os
 
+if os.getenv('FLASK_ENV') == 'development':
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_dance.contrib.github import make_github_blueprint, github
@@ -12,8 +15,11 @@ from system_prompts import PROMPTS
 import feedparser
 from datetime import datetime, timedelta, timezone
 import markdown
+from flask import request as flask_request
+import requests
 
 load_dotenv()
+print("CLIENT ID:", os.getenv('GITHUB_CLIENT_ID'))
 
 # --- App setup ---
 app = Flask(__name__)
@@ -35,6 +41,12 @@ github_bp = make_github_blueprint(
     storage=SessionStorage()
 )
 app.register_blueprint(github_bp, url_prefix='/login')
+
+
+@app.before_request
+def log_request():
+    print("REQUEST URL:", flask_request.url)
+
 
 # --- Gemini ---
 client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
@@ -72,6 +84,59 @@ def github_logged_in(blueprint, token):
         db.session.commit()
     login_user(user)
     return False
+
+def fetch_figma(file_id, token):
+    headers = {"X-Figma-Token": token}
+    
+    # Get file info
+    file_resp = requests.get(f"https://api.figma.com/v1/files/{file_id}", headers=headers)
+    file_data = file_resp.json()
+    
+    # Get version history
+    versions_resp = requests.get(f"https://api.figma.com/v1/files/{file_id}/versions", headers=headers)
+    versions = versions_resp.json().get('versions', [])
+    
+    # Extract useful text from document
+    def extract_text(node, texts=[]):
+        if node.get('type') == 'TEXT':
+            texts.append(node.get('characters', ''))
+        for child in node.get('children', []):
+            extract_text(child, texts)
+        return texts
+    
+    texts = extract_text(file_data.get('document', {}))
+    
+    summary = f"File: {file_data.get('name')}\n"
+    summary += f"Last Modified: {file_data.get('lastModified')}\n"
+    summary += f"Versions: {len(versions)}\n\n"
+    summary += "Version History:\n"
+    for v in versions:
+        summary += f"- {v['created_at']} by {v['user']['handle']}"
+        if v.get('label'):
+            summary += f" | Label: {v['label']}"
+        if v.get('description'):
+            summary += f" | {v['description']}"
+        summary += "\n"
+    summary += f"\nText content found in file:\n" + "\n".join(texts)
+    
+    return summary
+
+@app.route('/figma', methods=["GET", "POST"])
+@login_required
+def figma():
+    output = None
+    if request.method == "POST":
+        file_id = request.form.get("file_id")
+        mode = request.form.get("mode", "summarize")
+        token = os.getenv("FIGMA_ACCESS_TOKEN")
+        content = fetch_figma(file_id, token)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=content,
+            config={"system_instruction": PROMPTS[mode]}
+        )
+        output = markdown.markdown(response.text)
+    return render_template("figma.html", output=output)
 
 # --- Routes ---
 @app.route('/', methods=["GET", "POST"])

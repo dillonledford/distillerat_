@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Distillerat - Figma</title></head>
+<body>
+    <h1>Fetch Figma File</h1>
+    <form method="POST">
+        <input name="file_id" placeholder="Figma file ID e.g. yiUPmaeA1sO9hMI5VUJXnN" size="50"><br><br>
+        <select name="mode">
+            <option value="summarize">Summarize</option>
+            <option value="synthesize">Synthesize</option>
+            <option value="research">Research</option>
+        </select><br><br>
+        <button type="submit">Fetch</button>
+    </form>
+    {% if output %}
+        <h2>Result</h2>
+        <div>{{ output | safe }}</div>
+    {% endif %}
+    <br><a href="/dashboard">Dashboard</a>
+</body>
+</html>

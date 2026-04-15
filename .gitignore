@@ -1,4 +1,5 @@
 .env
+env_Live_Local/
 __pycache__/
 *.pyc
 instance/
