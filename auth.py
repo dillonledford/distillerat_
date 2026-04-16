@@ -1,6 +1,6 @@
 from flask_dance.contrib.github import make_github_blueprint
 from flask_dance.consumer.storage.session import SessionStorage
-from flask_dance.consumer import oauth_authorized, OAuth2ConsumerBlueprint
+from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import make_google_blueprint
 from flask_login import login_user
 from models import db, User

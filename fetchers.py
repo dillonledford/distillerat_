@@ -33,7 +33,6 @@ def fetch_drive_folder(folder_id, token, days=7):
             "orderBy": "modifiedTime desc"
         }
     )
-    print("DRIVE API RESPONSE:", drive_resp.json())
     files = drive_resp.json().get('files', [])
     
     summary = f"Google Drive Folder - {len(files)} files modified in timeframe:\n\n"

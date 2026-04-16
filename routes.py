@@ -5,9 +5,10 @@ from dotenv import load_dotenv
 from system_prompts import PROMPTS
 from models import db, User, UserSource
 from fetchers import fetch_feed, fetch_drive_folder
-import itertools
 import markdown
 import os
+
+load_dotenv()
 
 GEMINI_KEYS = [
     os.getenv('GEMINI_API_KEY_1'),
@@ -61,7 +62,7 @@ def register_routes(app):
         identifier = request.form.get("identifier")
         source_type = request.form.get("source_type")
         label = request.form.get("label", identifier)
-        if identifier:
+        if identifier and len(identifier) < 200:
             source = UserSource(
                 user_id=current_user.id,
                 source_type=source_type,
@@ -113,11 +114,8 @@ def register_routes(app):
             elif source.source_type == 'google_drive':
                 from flask_dance.contrib.google import google
                 token = google.token.get("access_token") if google.token else None
-                print("GOOGLE TOKEN:", token)
-                print("FOLDER ID:", source.identifier)
                 if token:
                     content = fetch_drive_folder(source.identifier, token, days=timeframe)
-                    print("DRIVE CONTENT:", content)
                     all_content.append(f"## Google Drive: {source.label}\n{content}")
 
         if all_content:

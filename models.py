@@ -12,6 +12,6 @@ class User(UserMixin, db.Model):
 class UserSource(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    source_type = db.Column(db.String)  # 'github' or 'figma'
-    identifier = db.Column(db.String)   # repo name or figma file ID
+    source_type = db.Column(db.String)  # 'github' or 'google drive'
+    identifier = db.Column(db.String)   # repo name or google drive file ID
     label = db.Column(db.String)        # optional friendly name
