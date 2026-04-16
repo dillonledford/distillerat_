@@ -5,6 +5,7 @@ body {
   font-family: arial, sans-serif;
   font-size: 14px;
   color: #f5f5f5;
+  line-height: 1.7;
 }
 
 a {
@@ -39,36 +40,39 @@ img {
   padding-right: 2%;
 }
 
-body {
-  margin: 25px auto;
-  max-width: 900px;
-  background-color: #181a1b;
-  font-family: arial, sans-serif;
-  font-size: 14px;
-  color: #f5f5f5;
-}
-
-a {
+h1, h2 {
   color: #87cefa;
-  font-weight: bold;
-  text-decoration: none;
 }
 
-input, select, button {
-  background-color: #2a2d2e;
-  color: #f5f5f5;
-  border: 1px solid #444;
-  padding: 6px 10px;
-  border-radius: 4px;
-  margin: 4px 2px;
+/* Report styling */
+.report-content {
+  background-color: #1e2122;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 20px;
+  line-height: 1.8;
 }
 
-button {
-  cursor: pointer;
-  background-color: #2e5f8a;
-  border: none;
+.report-content h2 {
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+  margin-top: 24px;
+  margin-bottom: 12px;
 }
 
-button:hover {
-  background-color: #3a7ab5;
+.report-content h2:first-child {
+  margin-top: 0;
+}
+
+.report-content ul {
+  padding-left: 20px;
+}
+
+.report-content li {
+  margin-bottom: 6px;
+}
+
+.report-content p {
+  margin-bottom: 12px;
 }
