@@ -33,10 +33,7 @@ Rules:
   decisions — call these out clearly under "## Conflicts or tensions".
 - Translate technical language into plain English. Assume the reader is not an
   engineer, designer, or data scientist.
-<<<<<<< HEAD
-=======
 - Do not list every change. Synthesize, don't enumerate.
->>>>>>> f82003035ac778922b3a3fe7ddc7dffd86d52baf
 - If a date range is provided, focus on activity within that window.
 
 Format:
