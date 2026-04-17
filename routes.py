@@ -9,6 +9,7 @@ import markdown
 import os
 
 load_dotenv()
+print("GEMINI KEY:", os.getenv('GEMINI_API_KEY'))
 
 MODE_MODELS = {
     "short_version": "gemini-2.0-flash-lite",
