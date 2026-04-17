@@ -189,7 +189,7 @@ strong {
     display: block;
     text-align: right;
     font-weight: normal;
-    margin-top: 40px;
+    margin-top: 0px;
     color: #888;
 }
 
@@ -202,6 +202,7 @@ strong {
     font-weight: bold;
     text-align: center;
     margin-bottom: 0px;
+	margin-top: 0px;
 }
 
 .page-subtitle {
@@ -239,7 +240,6 @@ strong {
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
-    margin-bottom: 16px;
 }
 
 .profile-bar img {
@@ -252,4 +252,21 @@ strong {
 .profile-bar span {
     color: #f5f5f5;
     font-weight: bold;
+}
+
+.logo-centered {
+	display: block;
+	margin: auto;
+}
+
+
+.cursor {
+    animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+		animation: blink 1s step-start infinite;
+    }
 }
