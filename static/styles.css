@@ -58,7 +58,8 @@ h3 {
   margin-top: 4px;
 }
 
-/* Report styling */
+/* Report styling -- BEGIN ------------ */
+
 .report-content {
 	background-color: #1e2122;
 	border: 1px solid #333;
@@ -68,7 +69,16 @@ h3 {
 	line-height: 1.7;
 }
 
+.report-content h1 {
+	color: #87cefa;
+	border-bottom: 1px solid #333;
+	padding-bottom: 8px;
+	margin-top: 24px;
+	margin-bottom: 12px;
+}
+
 .report-content h2 {
+	color: #87cefa;
 	border-bottom: 1px solid #333;
 	padding-bottom: 8px;
 	margin-top: 24px;
@@ -90,6 +100,8 @@ h3 {
 .report-content p {
 	margin-bottom: 12px;
 }
+
+/* Report styling -- END ------------ */
 
 li {
 	padding-bottom: 6px;  /* reduce this */

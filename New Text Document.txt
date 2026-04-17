@@ -1,4 +1,0 @@
-# run this once in your project folder
-from PIL import Image
-img = Image.new('RGB', (32, 32), color='#181a1b')
-img.save('static/favicon.ico')

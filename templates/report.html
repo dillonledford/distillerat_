@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="icon" type="image/x-icon" href="static/favicon.ico">
-<title>Distillerat - Report</title>
+<link rel="icon" type="image/x-icon" href="static/favicon.png">
+<title>distillerat_ Report</title>
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Report</h1>
-    {% if output %}
-        <div class="report-content">{{ output | safe }}</div>
-    {% endif %}
-	<a href="/" class="back-button">← Dashboard</a>
+
+	{% if current_user.is_authenticated %}
+	<!-- USER (Logged In) ----------------------------------------->
+		
+		<div class="profile-bar">
+			<img src="{{ current_user.avatar_url }}" alt="avatar">
+			<span>{{ current_user.username }}</span>
+		</div>
+
+		<img src="/static/distill_logo2.png" class="logo-centered">
+		<h1 class="page-title">distillerat<span class="cursor">_</span> Report</h1>
+
+		{% if output %}
+			<div class="report-content">{{ output | safe }}</div>
+		{% endif %}
+		
+		<a href="/" class="back-button">← Dashboard</a>
+
+	{% else %}
+	<!-- VISITOR (Logged Out) ------------------------------------->
+
+		<img src="/static/distill_logo2.png" class="logo-centered">
+		<h1 class="page-title">distillerat<span class="cursor">_</span> Report</h1>
+
+		{% if output %}
+			<div class="report-content">{{ output | safe }}</div>
+		{% endif %}
+		
+		<a href="/" class="back-button">← Dashboard</a>
+
+	{% endif %}
+	
 </body>
 </html>
