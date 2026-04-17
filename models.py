@@ -7,6 +7,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     github_id = db.Column(db.String, unique=True)
     username = db.Column(db.String)
+    avatar_url = db.Column(db.String)
     sources = db.relationship('UserSource', backref='user', lazy=True)
 
 class UserSource(db.Model):

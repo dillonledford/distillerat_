@@ -10,10 +10,13 @@
 {% if current_user.is_authenticated %}
     <!-- LOGGED IN USER VIEW -->
 	
+	<div class="profile-bar">
+		<img src="{{ current_user.avatar_url }}" alt="avatar">
+		<span>{{ current_user.username }}</span>
+	</div>
+	
 	<h1 class="page-title">Distillerat</h1>
     <h3 style="font-weight:bold; text-align: center;">Monitor changes across your projects, tools, and workflows.</h3>
-	
-	<h1 class="username-display">{{ current_user.username }}</h1>
 
 	<h2 class="section-header">GitHub Source</h2>
 	

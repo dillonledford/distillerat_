@@ -26,7 +26,8 @@ def github_logged_in(blueprint, token):
     if not user:
         user = User(
             github_id=str(github_info['id']),
-            username=github_info['login']
+            username=github_info['login'],
+            avatar_url=github_info.get('avatar_url', '')
         )
         db.session.add(user)
         db.session.commit()
