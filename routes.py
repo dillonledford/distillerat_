@@ -10,32 +10,26 @@ import os
 
 load_dotenv()
 
-GEMINI_KEYS = [
-    os.getenv('GEMINI_API_KEY_1'),
-    os.getenv('GEMINI_API_KEY_2'),
-    os.getenv('GEMINI_API_KEY_3'),
-    os.getenv('GEMINI_API_KEY_4'),
-    os.getenv('GEMINI_API_KEY_5'),
-]
-# Filter out any None values
-GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
+MODE_MODELS = {
+    "short_version": "gemini-2.0-flash-lite",
+    "whats_changed": "gemini-2.5-flash-lite",
+    "big_picture": "gemini-2.5-flash",
+    "needs_attention": "gemini-2.5-flash"
+}
 
-def get_gemini_response(contents, system_instruction):
-    for key in GEMINI_KEYS:
-        try:
-            c = genai.Client(api_key=key)
-            response = c.models.generate_content(
-                model="gemini-2.5-flash-lite",
-                contents=contents,
-                config={"system_instruction": system_instruction}
-            )
-            return response.text
-        except Exception as e:
-            if '429' in str(e) or '503' in str(e):
-                print(f"Key exhausted, trying next...")
-                continue
-            raise e
-    return "All API keys exhausted. Please try again later."
+def get_gemini_response(contents, system_instruction, mode="whats_changed"):
+    api_key = os.getenv('GEMINI_API_KEY')
+    model = MODE_MODELS.get(mode, "gemini-2.5-flash-lite")
+    try:
+        c = genai.Client(api_key=api_key)
+        response = c.models.generate_content(
+            model=model,
+            contents=contents,
+            config={"system_instruction": system_instruction}
+        )
+        return response.text
+    except Exception as e:
+        return f"Error generating report: {str(e)}"
 
 def register_routes(app):
 
@@ -92,7 +86,7 @@ def register_routes(app):
             items = fetch_feed(url, days=timeframe)
             if items:
                 combined = "\n\n".join(items)
-                output = markdown.markdown(get_gemini_response(combined, PROMPTS["whats_changed"]))
+                output = markdown.markdown(get_gemini_response(combined, PROMPTS["whats_changed"], "whats_changed"))
             else:
                 output = "No releases found for that repo in the selected timeframe."
         return render_template('report.html', output=output)
@@ -120,9 +114,7 @@ def register_routes(app):
 
         if all_content:
             combined = "\n\n".join(all_content)
-
-            output = markdown.markdown(get_gemini_response(combined, PROMPTS[mode]))
-
+            output = markdown.markdown(get_gemini_response(combined, PROMPTS[mode], mode))
         else:
             output = "No content found for the selected timeframe."
         return render_template('report.html', output=output)
