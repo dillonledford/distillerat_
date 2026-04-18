@@ -16,3 +16,13 @@ class UserSource(db.Model):
     source_type = db.Column(db.String)  # 'github' or 'google drive'
     identifier = db.Column(db.String)   # repo name or google drive file ID
     label = db.Column(db.String)        # optional friendly name
+
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    report_type = db.Column(db.String)
+    time_range = db.Column(db.String)
+    content = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    user = db.relationship('User', backref='reports')
+    

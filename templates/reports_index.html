@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/x-icon" href="static/favicon.png">
+    <title>distillerat_ Saved Reports</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <div class="profile-bar">
+        <img src="{{ current_user.avatar_url }}" alt="avatar">
+        <span>{{ current_user.username }}</span>
+    </div>
+
+    <img src="/static/distill_logo2.png" class="logo-centered">
+    <h1 class="page-title">distillerat<span class="cursor">_</span></h1>
+    <h3 style="font-weight:bold; text-align:center;">Saved Reports</h3>
+
+    {% if reports %}
+        <div class="sources-container">
+        {% for report in reports %}
+            <div class="source-chip">
+                <span class="chip-type-{% if report.report_type == 'full_briefing' %}github{% else %}google{% endif %}">
+                    {{ "Full Briefing" if report.report_type == "full_briefing" else "Quick Summary" }}
+                </span>
+                <span>
+                    {{ report.created_at.strftime('%b %d, %Y %I:%M %p') }} —
+                    {% if report.time_range == '1' %}Today
+                    {% elif report.time_range == '7' %}This Week
+                    {% else %}This Month{% endif %}
+                </span>
+                <a href="/reports/{{ report.id }}">view</a>
+                <form action="/reports/delete/{{ report.id }}" method="POST" style="display:inline;">
+                    <button type="submit" style="background:none; border:none; color:#888; cursor:pointer; padding:0; font-size:16px; font-weight:bold;">×</button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align:center; color:#888;">No saved reports yet. Generate a report to get started.</p>
+    {% endif %}
+
+    <a href="/" class="back-button">← Dashboard</a>
+
+</body>
+</html>

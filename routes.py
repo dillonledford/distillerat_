@@ -3,7 +3,7 @@ from flask_login import login_required, logout_user, current_user
 from google import genai
 from dotenv import load_dotenv
 from system_prompts import PROMPTS
-from models import db, User, UserSource
+from models import db, User, UserSource, Report
 from fetchers import fetch_feed, fetch_drive_folder
 import markdown
 import os
@@ -89,6 +89,8 @@ def register_routes(app):
                 output = "No releases found for that repo in the selected timeframe."
         return render_template('report.html', output=output)
 
+## UPDATED: Reports database
+
     @app.route('/report', methods=["POST"])
     @login_required
     def report():
@@ -96,7 +98,6 @@ def register_routes(app):
         mode = request.form.get("mode", "full_briefing")
         sources = UserSource.query.filter_by(user_id=current_user.id).all()
         all_content = []
-
         for source in sources:
             if source.source_type == 'github':
                 url = f"https://github.com/{source.identifier}/releases.atom"
@@ -109,13 +110,49 @@ def register_routes(app):
                 if token:
                     content = fetch_drive_folder(source.identifier, token, days=timeframe)
                     all_content.append(f"## Google Drive: {source.label}\n{content}")
-
         if all_content:
             combined = "\n\n".join(all_content)
-            output = markdown.markdown(get_gemini_response(combined, PROMPTS[mode], mode))
+            raw = get_gemini_response(combined, PROMPTS[mode], mode)
+            output = markdown.markdown(raw)
+            report = Report(
+                user_id=current_user.id,
+                report_type=mode,
+                time_range=str(timeframe),
+                content=raw
+            )
+            db.session.add(report)
+            db.session.commit()
         else:
             output = "No content found for the selected timeframe."
         return render_template('report.html', output=output)
+
+## UPDATED: Reports Saving
+
+    @app.route('/reports')
+    @login_required
+    def saved_reports():
+        reports = Report.query.filter_by(
+            user_id=current_user.id
+        ).order_by(Report.created_at.desc()).all()
+        return render_template('reports_index.html', reports=reports)
+
+    @app.route('/reports/<int:report_id>')
+    @login_required
+    def view_report(report_id):
+        report = Report.query.get_or_404(report_id)
+        if report.user_id != current_user.id:
+            return redirect(url_for('dashboard'))
+        output = markdown.markdown(report.content)
+        return render_template('report.html', output=output, saved_report=report)
+
+    @app.route('/reports/delete/<int:report_id>', methods=["POST"])
+    @login_required
+    def delete_report(report_id):
+        report = Report.query.get_or_404(report_id)
+        if report.user_id == current_user.id:
+            db.session.delete(report)
+            db.session.commit()
+        return redirect(url_for('saved_reports'))
 
     @app.route('/logout')
     @login_required

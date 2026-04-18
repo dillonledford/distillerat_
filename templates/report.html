@@ -22,6 +22,16 @@
 			<div class="report-content">{{ output | safe }}</div>
 		{% endif %}
 		
+		{% if saved_report %}
+			<p style="text-align:center; color:#888; margin-bottom:0;">
+				{{ "Full Briefing" if saved_report.report_type == "full_briefing" else "Quick Summary" }} &mdash;
+				{% if saved_report.time_range == '1' %}Today
+				{% elif saved_report.time_range == '7' %}This Week
+				{% else %}This Month{% endif %}
+				&mdash; {{ saved_report.created_at.strftime('%b %d, %Y %I:%M %p') }}
+			</p>
+		{% endif %}
+		
 		<a href="/" class="back-button">← Dashboard</a>
 
 	{% else %}
