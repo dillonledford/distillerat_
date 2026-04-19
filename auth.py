@@ -40,8 +40,7 @@ google_bp = make_google_blueprint(
     scope=[
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/drive.readonly",
-        "https://www.googleapis.com/auth/documents.readonly"
+        "https://www.googleapis.com/auth/drive.file",
     ],
     redirect_to="index",
     storage=SessionStorage()
