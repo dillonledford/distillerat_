@@ -18,33 +18,53 @@
 
     <img src="/static/distill_logo2.png" class="logo-centered">
     <h1 class="page-title">distillerat<span class="cursor">_</span></h1>
-    <h3 style="font-weight:bold; text-align:center;">Saved Reports</h3>
+	<h3 class="page-subtitle">Saved Reports</h3>
 
     {% if reports %}
-        <div class="sources-container">
+	
+        <div class="sources-container-reports">
         {% for report in reports %}
-            <div class="source-chip">
-                <span class="chip-type-{% if report.report_type == 'full_briefing' %}github{% else %}google{% endif %}">
-                    {{ "Full Briefing" if report.report_type == "full_briefing" else "Quick Summary" }}
-                </span>
-                <span>
-                    {{ report.created_at.strftime('%b %d, %Y %I:%M %p') }} —
-                    {% if report.time_range == '1' %}Today
-                    {% elif report.time_range == '7' %}This Week
-                    {% else %}This Month{% endif %}
-                </span>
-                <a href="/reports/{{ report.id }}">view</a>
-                <form action="/reports/delete/{{ report.id }}" method="POST" style="display:inline;">
-                    <button type="submit" style="background:none; border:none; color:#888; cursor:pointer; padding:0; font-size:16px; font-weight:bold;">×</button>
-                </form>
-            </div>
+
+			<div class="source-chip-index">
+				<a href="/reports/{{ report.id }}" class="chip-row-link">
+					<span class="chip-type-{% if report.report_type == 'full_briefing' %}github{% else %}google{% endif %}">
+						{{ "Full Briefing" if report.report_type == "full_briefing" else "Quick Summary" }}
+					</span>
+					<span>
+						{{ (report.created_at - timedelta(days=report.time_range|int)).strftime('%m/%d/%y') }} 
+						- {{ report.created_at.strftime('%m/%d/%y') }} 
+						- {{ report.created_at.strftime('%I:%M %p') }}
+					</span>
+				</a>
+				<form action="/reports/delete/{{ report.id }}" method="POST" style="display:inline;">
+					<button type="submit" class="x-delete">×</button>
+				</form>
+			</div>
+
         {% endfor %}
         </div>
+
     {% else %}
         <p style="text-align:center; color:#888;">No saved reports yet. Generate a report to get started.</p>
     {% endif %}
 
     <a href="/" class="back-button">← Dashboard</a>
 
+<script>
+document.addEventListener('click', function(e) {
+    // Close profile dropdown if click is outside
+    const profileBar = document.querySelector('.profile-bar');
+    if (profileBar && !profileBar.contains(e.target)) {
+        profileBar.classList.remove('open');
+    }
+    
+    // Close all chip dropdowns if click is outside
+    document.querySelectorAll('.source-chip.open').forEach(function(chip) {
+        if (!chip.contains(e.target)) {
+            chip.classList.remove('open');
+        }
+    });
+});
+</script>
 </body>
 </html>

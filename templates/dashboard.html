@@ -9,7 +9,6 @@
 
 {% if current_user.is_authenticated %}
     <!-- LOGGED IN USER VIEW -->
-	
 	<div class="profile-bar" onclick="this.classList.toggle('open')">
 		<img src="{{ current_user.avatar_url }}" alt="avatar">
 		<span>{{ current_user.username }} ▾</span>
@@ -101,20 +100,19 @@
 	<div class="connection-icons">
 		<img src="/static/Linked_igithub_dark.png" class="icon-centered">
 		{% if google_connected %}
-		
-			<img src="/static/Linked_igoogle_dark.png" alt="Google Drive Connected">
-			
+			<img src="/static/Linked_igoogle_dark.png" class="icon-centered">
 		{% else %}
-			<a href="/login/google/google"><img src="/static/igoogle_dark.png"></a>
+			<a href="/login/google/google"><img src="/static/igoogle_dark.png" class="icon-centered"></a>
 		{% endif %}
 	</div>
 
 {% else %}
     <!-- VISITOR VIEW -->
 
+<!-- add space so logo doesn't move after logging in -->
+	<div class="blank-profile-space"></div>
 
 	<img src="/static/distill_logo2.png" class="logo-centered">
-	
 	
 	<h1 class="page-title">distillerat<span class="cursor">_</span></h1>
 	<h3 class="page-subtitle">Monitor changes across projects, tools, and workflows.</h3>

@@ -2,7 +2,7 @@
 
 body {
 	margin: 25px auto;
-	max-width: 900px;
+	max-width: 700px;
 	background-color: #181a1b;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 16px;
@@ -27,12 +27,12 @@ input, select, button {
 
 button {
 	cursor: pointer;
-	background-color: #2e5f8a;
+	background-color: #2b6d96;
 	border: none;
 }
 
 button:hover {
-	background-color: #3a7ab5;
+	background-color: #3c89bd;
 }
 
 h1 {
@@ -141,8 +141,23 @@ strong {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  margin: 4px;
   justify-content: center;
+  margin-bottom: 12px;
+}
+
+.sources-container-reports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 12px;
+  
+}
+
+.sources-container-reports a {
+	text-decoration: none;
+	font-weight: normal;
 }
 
 .source-chip {
@@ -150,12 +165,41 @@ strong {
   align-items: flex-start;
   background-color: #2a2d2e;
   border: 1px solid #444;
-  border-radius: 12px;
-  padding: 4px 12px;
+  border-radius: 4px;
+  padding: 2px 12px;
   font-size: 14px;
-  gap: 0;
+  gap: 0px;
   cursor: pointer;
   position: relative;
+}
+
+.source-chip-index {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2a2d2e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  gap: 10px;
+  width: 60%;
+  box-sizing: border-box;
+}
+
+.chip-row-link {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    text-decoration: none;
+    color: #f5f5f5;
+    font-weight: normal;
+}
+
+.source-chip-index:hover {
+    background-color: #444;
 }
 
 .chip-main {
@@ -181,7 +225,7 @@ strong {
   padding: 8px 12px;
   background-color: #2a2d2e;
   border: 1px solid #444;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 14px;
   color: #fff;
   width: 220px;
@@ -210,6 +254,7 @@ strong {
   color: #0FBF3E;
   font-size: 14px;
   font-weight: bold;
+  padding-right:25px;
 }
 
 .chip-type-google {
@@ -221,8 +266,8 @@ strong {
 .cta-box {
     background-color: #1e2122;
     border: 1px solid #333;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 4px;
+    padding: 16px;
 	max-width: 580px;
 	margin-top: 2%;
 	margin-left: auto;
@@ -263,6 +308,7 @@ strong {
     margin-bottom: 0px;
 	margin-top: 0px;
 }
+
 
 .page-subtitle {
     font-weight: bold;
@@ -343,7 +389,7 @@ strong {
     left: 0;
     background-color: #2a2d2e;
     border: 1px solid #444;
-    border-radius: 6px;
+    border-radius: 4px;
     min-width: 160px;
     z-index: 100;
     margin-top: 6px;
@@ -420,27 +466,35 @@ strong {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 16px;
-    margin: 16px auto;
+    gap: 8px;
+    margin: 10px auto;
 }
 
 .connection-icons a {
     display: flex;
     align-items: center;
-    margin-top: 0;
-    padding: 0;
     line-height: 1;
 }
 
 .connection-icons img {
     max-width: 160px;
-    padding: 0;
 }
 
-img {
-
+.x-delete {
+	background:none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	font-size: 16px;
+	font-weight: bold;
 }
 
-.icon-centered {
-	
+.x-delete:hover {
+	background:none;
+	color: red;
+}
+
+/*blank top visitor space for no logo jump*/
+.blank-profile-space {
+	padding-top: 5.1%;
 }

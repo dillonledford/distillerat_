@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from system_prompts import PROMPTS
 from models import db, User, UserSource, Report
 from fetchers import fetch_feed, fetch_github_repo, fetch_drive_folder
+from datetime import datetime, timedelta
 import markdown
 import os
 
@@ -127,7 +128,7 @@ def register_routes(app):
             output = "No content found for the selected timeframe."
         return render_template('report.html', output=output)
 
-## UPDATED: Reports Saving
+## UPDATED: Reports Saving 4-19 5:30 AM
 
     @app.route('/reports')
     @login_required
@@ -135,7 +136,8 @@ def register_routes(app):
         reports = Report.query.filter_by(
             user_id=current_user.id
         ).order_by(Report.created_at.desc()).all()
-        return render_template('reports_index.html', reports=reports)
+        return render_template('reports_index.html', reports=reports, timedelta=timedelta)
+
 
     @app.route('/reports/<int:report_id>')
     @login_required
