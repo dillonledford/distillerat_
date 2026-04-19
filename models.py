@@ -23,6 +23,7 @@ class Report(db.Model):
     report_type = db.Column(db.String)
     time_range = db.Column(db.String)
     content = db.Column(db.Text)
+    sources_used = db.Column(db.String)  # ← add this, comma separated labels
     created_at = db.Column(db.DateTime, default=db.func.now())
     user = db.relationship('User', backref='reports')
     

@@ -25,10 +25,9 @@
 	{% endif %}
 
     {% if reports %}
-	
-        <div class="sources-container-reports">
-        {% for report in reports %}
-
+			
+		<div class="sources-container-reports">
+		{% for report in reports %}
 			<div class="source-chip-index">
 				<a href="/reports/{{ report.id }}" class="chip-row-link">
 					<span class="chip-type-{% if report.report_type == 'full_briefing' %}fullbrief-index{% else %}quicksum-index{% endif %}">
@@ -40,13 +39,19 @@
 						— {{ report.created_at.strftime('%I:%M %p') }}
 					</span>
 				</a>
+				{% if report.sources_used %}
+				<div class="report-hover-detail">
+					{% for label in report.sources_used.split(', ') %}
+						<span>{{ label }}</span>
+					{% endfor %}
+				</div>
+				{% endif %}
 				<form action="/reports/delete/{{ report.id }}" method="POST" style="display:inline;">
 					<button type="submit" class="x-delete">×</button>
 				</form>
 			</div>
-
-        {% endfor %}
-        </div>
+		{% endfor %}
+		</div>
 
     {% else %}
         <p style="text-align:center; color:#888;">No saved reports yet. Generate a report to get started.</p>

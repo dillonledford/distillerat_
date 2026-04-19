@@ -114,14 +114,18 @@ def register_routes(app):
                     all_content.append(f"## Google Drive: {source.label}\n{content}")
         if all_content:
             combined = "\n\n".join(all_content)
+
             raw = get_gemini_response(combined, PROMPTS[mode], mode)
             output = markdown.markdown(raw)
+            source_labels = [s.label for s in sources]  # ← add this line
             report = Report(
                 user_id=current_user.id,
                 report_type=mode,
                 time_range=str(timeframe),
-                content=raw
+                content=raw,
+                sources_used=", ".join(source_labels)
             )
+
             db.session.add(report)
             db.session.commit()
         else:
