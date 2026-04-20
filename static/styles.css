@@ -57,7 +57,6 @@ h3 {
 	background-color: #1e2122;
 	border: 1px solid #333;
 	border-radius: 6px;
-	padding: 12px;
 	margin-top: 20px;
 	line-height: 1.7;
 }
@@ -82,7 +81,7 @@ h3 {
 	color: #87cefa;
 	border-bottom: 1px solid #333;
 	margin-bottom: 12px;
-	padding-left: 24px;
+	padding-left: 12px;
 }
 
 .report-content h4 {
@@ -653,12 +652,17 @@ strong {
 	
 	/*former github-index*/
 	.chip-type-fullbrief-index {
-	  font-size: 12px;
+	  font-size: 14px;
 	}
 
 	/*former google-index*/
 	.chip-type-quicksum-index {
-	  font-size: 12px;
+	  font-size: 14px;
+	}
+	
+	/*blank top visitor space for no logo jump*/
+	.blank-profile-space {
+		padding-top: 7.6%;
 	}
 
 }
