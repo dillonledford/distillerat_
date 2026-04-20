@@ -593,7 +593,6 @@ strong {
 }
 
 .github-visitor {
-	width: 36%;
 	margin-left: 6%;
 }
 
@@ -604,6 +603,7 @@ strong {
     body {
         margin: 12px;
         max-width: 100%;
+		height: auto;
     }
 
     .source-form {
@@ -637,11 +637,11 @@ strong {
     }
 	
 	.page-subtitle {
-		font-size: 0.85em;
+		font-size: 0.9em;
 	}
 	
 	.github-visitor {
-		max-width: 36%;
+		max-width: 40%;
 		margin-left: 6%;
 	}
 	
