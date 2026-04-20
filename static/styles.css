@@ -647,22 +647,22 @@ strong {
 	}
 	
 	.date-style-index {
-		font-size: 14px;
+		font-size: 13px;
 	}
 	
 	/*former github-index*/
 	.chip-type-fullbrief-index {
-	  font-size: 14px;
+	  font-size: 13px;
 	}
 
 	/*former google-index*/
 	.chip-type-quicksum-index {
-	  font-size: 14px;
+	  font-size: 13px;
 	}
 	
 	/*blank top visitor space for no logo jump*/
 	.blank-profile-space {
-		padding-top: 7.6%;
+		padding-top: 7.2%;
 	}
 
 }
