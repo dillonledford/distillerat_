@@ -184,6 +184,19 @@ def register_routes(app):
     def terms():
         return render_template('terms.html')
 
+    @app.route('/sitemap.xml')
+    def sitemap():
+        from flask import Response
+        xml = '''<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <url><loc>https://distillerat.com/</loc></url>
+        <url><loc>https://distillerat.com/privacy</loc></url>
+        <url><loc>https://distillerat.com/terms</loc></url>
+    </urlset>'''
+        return Response(xml, mimetype='application/xml')
+            
+        
+
 ## comment out before pushing to server
 
     # @app.route('/error')
