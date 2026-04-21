@@ -86,6 +86,12 @@ Google Drive integration requires OAuth verification. The app is currently in Te
 
 ---
 
+Developer's Comment
+
+"I designed a pipeline where GitHub and Google Drive activity feeds into Gemini to generate plain-English briefings. Every integration is load-bearing — remove any one of them and the core function breaks."
+
+---
+
 ## License
 
 MIT
