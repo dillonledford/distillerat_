@@ -73,7 +73,6 @@ python gapp.py
 
 ## Notes
 
-## Notes
 Google Drive integration requires OAuth verification. The app is currently in Testing — contact the developer to be added as a test user for full Drive functionality. GitHub integration works for all users without restrictions.
 
 > [!NOTE]
