@@ -73,8 +73,16 @@ python gapp.py
 
 ## Notes
 
-Google Drive integration requires OAuth verification. The app is currently in Testing mode — contact the developer to be added as a test user for full Drive functionality. GitHub integration works for all users without restrictions.
+Google Drive integration requires OAuth verification. The app is currently in Testing — contact the developer to be added as a test user for full Drive functionality. GitHub integration works for all users without restrictions.
 
+> ⚠️ Google Login Warning
+> You may see an "unverified app" warning when signing in with Google. This is triggered because the app requests access to Google Drive and Docs — even though the access is strictly read-only. The app cannot create, edit, delete, or share any of your files.
+> Google requires a lengthy formal verification process for these scopes regardless of whether access is read-only or read/write, which is why the warning appears.
+> To proceed: click "Advanced" → "Go to [App Name] (unsafe)"
+> What the app can do: View your Drive files and read the contents of your Google Docs.
+> What the app cannot do: Create, edit, move, delete, download, or share anything.
+>
+contact me at admin@distillerat.com
 ---
 
 ## License
