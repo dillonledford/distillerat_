@@ -17,7 +17,7 @@
 		<span>{{ current_user.username }} ▾</span>
 		<div class="profile-dropdown">
 			<a href="/">Dashboard</a>
-			<a href="/reports">Saved Reports</a>
+			<a href="/reports">Saved Reports ({{ report_count }})</a>
 			<a href="/logout">Logout</a>
 		</div>
 	</div>
@@ -105,8 +105,17 @@
 {% else %}
     <!-- VISITOR VIEW -------------------------------------------->
 
-<!-- add space so logo doesn't move after logging in -->
-	<div class="blank-profile-space"></div>
+	<!-- Visitor Menu Bar -->
+	<div class="profile-bar" onclick="this.classList.toggle('open')">
+		<img src="/static/blank_user.png" alt="menu icon">
+		<span>Menu ▾</span>
+		<div class="profile-dropdown">
+			<a href="/">Dashboard</a>
+			<a href="#" onclick="showVisitorReports(event)">Saved Reports (<span id="visitor-report-count">0</span>)</a>
+			<a href="#" onclick="clearVisitorReports(event)">Clear All Reports</a>
+			<a href="/login/github">Log In</a>
+		</div>
+	</div>
 
 	<img src="/static/distill_logo2.png" class="logo-centered">
 	
@@ -135,6 +144,15 @@
 	
 	<a href="/login/github"><img src="/static/igithub.png" alt="Sign in with GitHub" class="github-visitor"></a>
 	
+	<!-- Visitor Reports Modal -->
+	<div id="visitor-reports-modal" class="modal">
+		<div class="modal-content">
+			<span class="modal-close" onclick="closeVisitorReports()">&times;</span>
+			<h2>Saved Reports</h2>
+			<div id="visitor-reports-list"></div>
+		</div>
+	</div>
+	
 {% endif %}
 
 <script>
@@ -152,6 +170,80 @@ document.addEventListener('click', function(e) {
         }
     });
 });
+
+// Visitor report management
+function updateVisitorReportCount() {
+	const reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+	const countElement = document.getElementById('visitor-report-count');
+	if (countElement) {
+		countElement.textContent = reports.length;
+	}
+}
+
+function showVisitorReports(e) {
+	e.preventDefault();
+	const reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+	const listElement = document.getElementById('visitor-reports-list');
+	
+	if (reports.length === 0) {
+		listElement.innerHTML = '<p style="text-align:center; color:#888;">No saved reports yet. Generate a report to get started.</p>';
+	} else {
+		let html = '<div class="sources-container-reports">';
+		reports.forEach(function(report) {
+			const date = new Date(report.created_at);
+			const dateStr = date.toLocaleDateString('en-US', {month:'2-digit', day:'2-digit', year:'2-digit'}) 
+				+ ' — ' + date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+			
+			html += `
+				<div class="source-chip-index">
+					<a href="/visitor_report?load=${report.id}" class="chip-row-link">
+						<span class="chip-type-fullbrief-index">Full Briefing</span>
+						<span class="date-style-index">${dateStr}</span>
+					</a>
+					<button onclick="deleteVisitorReport('${report.id}')" class="x-delete">×</button>
+				</div>
+			`;
+		});
+		html += '</div>';
+		listElement.innerHTML = html;
+	}
+	
+	document.getElementById('visitor-reports-modal').style.display = 'block';
+}
+
+function closeVisitorReports() {
+	document.getElementById('visitor-reports-modal').style.display = 'none';
+}
+
+function deleteVisitorReport(reportId) {
+	let reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+	reports = reports.filter(r => r.id !== reportId);
+	localStorage.setItem('visitor_reports', JSON.stringify(reports));
+	updateVisitorReportCount();
+	showVisitorReports(new Event('click'));
+}
+
+function clearVisitorReports(e) {
+	e.preventDefault();
+	if (confirm('Are you sure you want to delete all saved reports?')) {
+		localStorage.removeItem('visitor_reports');
+		updateVisitorReportCount();
+		alert('All reports have been cleared.');
+	}
+}
+
+// Update count on page load
+if (!{{ 'true' if current_user.is_authenticated else 'false' }}) {
+	updateVisitorReportCount();
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+	const modal = document.getElementById('visitor-reports-modal');
+	if (event.target == modal) {
+		closeVisitorReports();
+	}
+}
 </script>
 
 <div class="footer">
@@ -160,6 +252,7 @@ document.addEventListener('click', function(e) {
 	<a>Google Drive is a trademark of Google LLC.</a>
 </div>
 
+{% if current_user.is_authenticated %}
 <script>
 function updatePlaceholders() {
     const select = document.getElementById('source-type-select');
@@ -206,5 +299,7 @@ function pickerCallback(data) {
     }
 }
 </script>
+{% endif %}
+
 </body>
 </html>

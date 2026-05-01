@@ -17,10 +17,22 @@
 			<span>{{ current_user.username }} ▾</span>
 			<div class="profile-dropdown">
 				<a href="/">Dashboard</a>
-				<a href="/reports">Saved Reports</a>
+				<a href="/reports">Saved Reports ({{ report_count }})</a>
 				<a href="/logout">Logout</a>
 			</div>
 		</div>
+
+	{% else %}
+	<!-- VISITOR Menu Bar -->
+		<div class="profile-bar" onclick="this.classList.toggle('open')">
+			<img src="/static/blank_user.png" alt="menu icon">
+			<span>Menu ▾</span>
+			<div class="profile-dropdown">
+				<a href="/">Dashboard</a>
+				<a href="/login/github">Log In</a>
+			</div>
+		</div>
+	{% endif %}
 
 		<img src="/static/distill_logo2.png" class="logo-centered">
 		<h1 class="page-title">distillerat<span class="cursor">_</span></h1>
@@ -54,30 +66,20 @@
 		
 		{% if saved_report %}
 			<p class="report-bottom-stamp">
-				<span class="local-time-stamp" data-utc="{{ saved_report.created_at.strftime('%Y-%m-%dT%H:%M:%S') }}Z"></span>
+				<span class="local-time-stamp" data-utc="{% if saved_report.created_at %}{{ saved_report.created_at.strftime('%Y-%m-%dT%H:%M:%S') if saved_report.created_at is not string else saved_report.created_at }}Z{% endif %}"></span>
 			</p>
 		{% endif %}
 		
-		{% if saved_report %}
-			<a href="/reports" class="back-button">← Back to Reports</a>
+		{% if current_user.is_authenticated %}
+			{% if saved_report %}
+				<a href="/reports" class="back-button">← Back to Reports</a>
+			{% else %}
+				<a href="/" class="back-button">← Dashboard</a>
+			{% endif %}
 		{% else %}
 			<a href="/" class="back-button">← Dashboard</a>
 		{% endif %}
 
-	{% else %}
-	<!-- VISITOR (Logged Out) ------------------------------------->
-
-		<img src="/static/distill_logo2.png" class="logo-centered">
-		<h1 class="page-title">distillerat<span class="cursor">_</span> Report</h1>
-
-		{% if output %}
-			<div class="report-content">{{ output | safe }}</div>
-		{% endif %}
-		
-		<a href="/" class="back-button">← Dashboard</a>
-
-	{% endif %}
-	
 	<div class="footer">
 		<a href="/privacy">Privacy Policy</a>
 		<a href="/terms">Terms of Service</a>
@@ -85,16 +87,45 @@
 	</div>
 
 	<script>
+	// Format timestamp
 	document.querySelectorAll('.local-time-stamp').forEach(function(el) {
-		const date = new Date(el.getAttribute('data-utc'));
-		el.textContent = date.toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'}) 
-			+ ' — ' + date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+		const utcStr = el.getAttribute('data-utc');
+		if (utcStr) {
+			const date = new Date(utcStr);
+			el.textContent = date.toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'}) 
+				+ ' — ' + date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+		}
 	});
 
 	{% if saved_report %}
+	
+	// Save visitor report to localStorage if this is a visitor
+	{% if is_visitor %}
+	(function() {
+		const reportData = {
+			id: '{{ saved_report.id }}',
+			content: {{ saved_report.content | tojson }},
+			report_type: '{{ saved_report.report_type }}',
+			time_range: '{{ saved_report.time_range }}',
+			created_at: '{{ saved_report.created_at.isoformat() if saved_report.created_at is not string else saved_report.created_at }}',
+			repo: '{{ saved_report.repo }}'
+		};
+		
+		let reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+		
+		// Check if this report already exists
+		const existingIndex = reports.findIndex(r => r.id === reportData.id);
+		if (existingIndex === -1) {
+			reports.unshift(reportData);  // Add to beginning
+			localStorage.setItem('visitor_reports', JSON.stringify(reports));
+		}
+	})();
+	{% endif %}
+	
 	let audio = null;
 	let isPlaying = false;
 	let isLoading = false;
+	const reportContent = {{ saved_report.content | tojson }};
 
 	// Load saved voice preference
 	function loadVoicePreference() {
@@ -151,7 +182,21 @@
 			status.textContent = 'Generating audio...';
 
 			const voiceId = document.getElementById('voice-select').value;
-
+			
+			{% if is_visitor %}
+			// For visitors, send content in the request body
+			const response = await fetch('/tts/{{ saved_report.id }}', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ 
+					voice_id: voiceId,
+					content: reportContent
+				})
+			});
+			{% else %}
+			// For authenticated users, just send voice_id
 			const response = await fetch('/tts/{{ saved_report.id }}', {
 				method: 'POST',
 				headers: {
@@ -159,6 +204,7 @@
 				},
 				body: JSON.stringify({ voice_id: voiceId })
 			});
+			{% endif %}
 
 			if (!response.ok) {
 				throw new Error('Failed to generate audio');
@@ -220,6 +266,12 @@
 			!ttsButton.contains(e.target) && 
 			!voiceSettings.contains(e.target)) {
 			voiceSettings.classList.remove('open');
+		}
+		
+		// Close profile dropdown if click is outside
+		const profileBar = document.querySelector('.profile-bar');
+		if (profileBar && !profileBar.contains(e.target)) {
+			profileBar.classList.remove('open');
 		}
 	});
 	

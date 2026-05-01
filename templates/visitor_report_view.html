@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="icon" type="image/x-icon" href="static/favicon.png">
+	<title>distillerat_ Report</title>
+	<link rel="stylesheet" href="/static/styles.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="background-color: #181a1b;">
+
+	<!-- VISITOR Menu Bar -->
+	<div class="profile-bar" onclick="this.classList.toggle('open')">
+		<img src="/static/blank_user.png" alt="menu icon">
+		<span>Menu ▾</span>
+		<div class="profile-dropdown">
+			<a href="/">Dashboard</a>
+			<a href="#" onclick="showVisitorReports(event)">Saved Reports (<span id="visitor-report-count">0</span>)</a>
+			<a href="/login/github">Log In</a>
+		</div>
+	</div>
+
+	<img src="/static/distill_logo2.png" class="logo-centered">
+	<h1 class="page-title">distillerat<span class="cursor">_</span></h1>
+
+	<div class="tts-controls">
+		<button id="tts-button" class="tts-button">
+			<span id="tts-icon" onclick="toggleTTS(event)">🔊</span> 
+			<span id="tts-text" onclick="toggleTTS(event)">Listen to Report</span>
+			<span class="voice-toggle" onclick="toggleSettings(event)">▾</span>
+		</button>
+		<div id="voice-settings" class="voice-settings">
+			<label for="voice-select">Voice:</label>
+			<select id="voice-select" onchange="saveVoicePreference()">
+				<option value="JBFqnCBsd6RMkjVDRZzb">George (Male, Conversational)</option>
+				<option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Calm)</option>
+				<option value="AZnzlk1XvdvUeBnXmlld">Domi (Female, Strong)</option>
+				<option value="EXAVITQu4vr4xnSDxMaL">Bella (Female, Soft)</option>
+				<option value="ErXwobaYiN019PkySvjV">Antoni (Male, Well-rounded)</option>
+				<option value="MF3mGyEYCl7XYWbV9V6O">Elli (Female, Emotional)</option>
+				<option value="TxGEqnHWrfWFTfGW9XjX">Josh (Male, Deep)</option>
+			</select>
+		</div>
+		<div id="tts-status" class="tts-status"></div>
+	</div>
+
+	<div id="report-output" class="report-content"></div>
+	
+	<p class="report-bottom-stamp">
+		<span id="report-timestamp"></span>
+	</p>
+
+	<a href="/" class="back-button">← Dashboard</a>
+
+	<!-- Visitor Reports Modal -->
+	<div id="visitor-reports-modal" class="modal">
+		<div class="modal-content">
+			<span class="modal-close" onclick="closeVisitorReports()">&times;</span>
+			<h2>Saved Reports</h2>
+			<div id="visitor-reports-list"></div>
+		</div>
+	</div>
+
+	<div class="footer">
+		<a href="/privacy">Privacy Policy</a>
+		<a href="/terms">Terms of Service</a>
+		<a>Google Drive is a trademark of Google LLC.</a>
+	</div>
+
+	<script>
+	// Load the report from localStorage
+	const reportId = '{{ report_id }}';
+	let currentReport = null;
+	
+	(function loadReport() {
+		const reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+		currentReport = reports.find(r => r.id === reportId);
+		
+		if (!currentReport) {
+			document.getElementById('report-output').innerHTML = '<p style="text-align:center; color:#888;">Report not found.</p>';
+			return;
+		}
+		
+		// Convert markdown to HTML (simple conversion)
+		const markdownContent = currentReport.content;
+		const htmlContent = convertMarkdownToHTML(markdownContent);
+		document.getElementById('report-output').innerHTML = htmlContent;
+		
+		// Set timestamp
+		const date = new Date(currentReport.created_at);
+		const timestampEl = document.getElementById('report-timestamp');
+		timestampEl.textContent = date.toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'}) 
+			+ ' — ' + date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+	})();
+	
+	// Simple markdown to HTML converter
+	function convertMarkdownToHTML(markdown) {
+		let html = markdown;
+		
+		// Headers
+		html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+		html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+		html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+		
+		// Bold
+		html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+		
+		// Lists
+		html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+		html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
+		
+		// Wrap consecutive <li> in <ul>
+		html = html.replace(/(<li>.*<\/li>(\n|$))+/g, function(match) {
+			return '<ul>' + match + '</ul>';
+		});
+		
+		// Paragraphs
+		html = html.split('\n\n').map(para => {
+			if (!para.startsWith('<') && para.trim() !== '') {
+				return '<p>' + para + '</p>';
+			}
+			return para;
+		}).join('\n');
+		
+		return html;
+	}
+	
+	// TTS functionality
+	let audio = null;
+	let isPlaying = false;
+	let isLoading = false;
+
+	function loadVoicePreference() {
+		const savedVoice = localStorage.getItem('tts_voice_preference');
+		if (savedVoice) {
+			document.getElementById('voice-select').value = savedVoice;
+		}
+	}
+
+	function saveVoicePreference() {
+		const voiceSelect = document.getElementById('voice-select');
+		localStorage.setItem('tts_voice_preference', voiceSelect.value);
+	}
+
+	function toggleSettings(e) {
+		e.stopPropagation();
+		const settingsPanel = document.getElementById('voice-settings');
+		settingsPanel.classList.toggle('open');
+	}
+
+	loadVoicePreference();
+
+	async function toggleTTS() {
+		if (!currentReport) return;
+		
+		const button = document.getElementById('tts-button');
+		const icon = document.getElementById('tts-icon');
+		const text = document.getElementById('tts-text');
+		const status = document.getElementById('tts-status');
+
+		if (isLoading) return;
+
+		if (isPlaying) {
+			if (audio) {
+				audio.pause();
+				audio.currentTime = 0;
+				audio = null;
+			}
+			isPlaying = false;
+			icon.textContent = '🔊';
+			text.textContent = 'Listen to Report';
+			status.textContent = '';
+			return;
+		}
+
+		try {
+			isLoading = true;
+			button.disabled = true;
+			icon.textContent = '⏳';
+			text.textContent = 'Loading...';
+			status.textContent = 'Generating audio...';
+
+			const voiceId = document.getElementById('voice-select').value;
+
+			const response = await fetch('/tts/' + reportId, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ 
+					voice_id: voiceId,
+					content: currentReport.content
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to generate audio');
+			}
+
+			const blob = await response.blob();
+			const audioUrl = URL.createObjectURL(blob);
+			
+			audio = new Audio(audioUrl);
+			
+			audio.onplay = () => {
+				isPlaying = true;
+				isLoading = false;
+				button.disabled = false;
+				icon.textContent = '⏸️';
+				text.textContent = 'Stop';
+				status.textContent = 'Playing...';
+			};
+
+			audio.onended = () => {
+				isPlaying = false;
+				icon.textContent = '🔊';
+				text.textContent = 'Listen to Report';
+				status.textContent = '';
+				URL.revokeObjectURL(audioUrl);
+				audio = null;
+			};
+
+			audio.onerror = () => {
+				isPlaying = false;
+				isLoading = false;
+				button.disabled = false;
+				icon.textContent = '🔊';
+				text.textContent = 'Listen to Report';
+				status.textContent = 'Error playing audio - Please try again later';
+				URL.revokeObjectURL(audioUrl);
+				audio = null;
+			};
+
+			await audio.play();
+
+		} catch (error) {
+			console.error('TTS Error:', error);
+			isLoading = false;
+			button.disabled = false;
+			icon.textContent = '🔊';
+			text.textContent = 'Listen to Report';
+			status.textContent = 'Error: ' + error.message;
+		}
+	}
+	
+	// Visitor report management
+	function updateVisitorReportCount() {
+		const reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+		const countElement = document.getElementById('visitor-report-count');
+		if (countElement) {
+			countElement.textContent = reports.length;
+		}
+	}
+
+	function showVisitorReports(e) {
+		e.preventDefault();
+		const reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+		const listElement = document.getElementById('visitor-reports-list');
+		
+		if (reports.length === 0) {
+			listElement.innerHTML = '<p style="text-align:center; color:#888;">No saved reports yet. Generate a report to get started.</p>';
+		} else {
+			let html = '<div class="sources-container-reports">';
+			reports.forEach(function(report) {
+				const date = new Date(report.created_at);
+				const dateStr = date.toLocaleDateString('en-US', {month:'2-digit', day:'2-digit', year:'2-digit'}) 
+					+ ' — ' + date.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+				
+				html += `
+					<div class="source-chip-index">
+						<a href="/visitor_report?load=${report.id}" class="chip-row-link">
+							<span class="chip-type-fullbrief-index">Full Briefing</span>
+							<span class="date-style-index">${dateStr}</span>
+						</a>
+						<button onclick="deleteVisitorReport('${report.id}')" class="x-delete">×</button>
+					</div>
+				`;
+			});
+			html += '</div>';
+			listElement.innerHTML = html;
+		}
+		
+		document.getElementById('visitor-reports-modal').style.display = 'block';
+	}
+
+	function closeVisitorReports() {
+		document.getElementById('visitor-reports-modal').style.display = 'none';
+	}
+
+	function deleteVisitorReport(reportId) {
+		let reports = JSON.parse(localStorage.getItem('visitor_reports') || '[]');
+		reports = reports.filter(r => r.id !== reportId);
+		localStorage.setItem('visitor_reports', JSON.stringify(reports));
+		updateVisitorReportCount();
+		
+		// If we deleted the current report, redirect home/dashboard
+		if (reportId === '{{ report_id }}') {
+			window.location.href = '/';
+		} else {
+			showVisitorReports(new Event('click'));
+		}
+	}
+
+	updateVisitorReportCount();
+
+	// Close modal and settings when clicking outside
+	document.addEventListener('click', function(e) {
+		const voiceSettings = document.getElementById('voice-settings');
+		const ttsButton = document.getElementById('tts-button');
+		
+		if (voiceSettings && ttsButton && 
+			!ttsButton.contains(e.target) && 
+			!voiceSettings.contains(e.target)) {
+			voiceSettings.classList.remove('open');
+		}
+		
+		const profileBar = document.querySelector('.profile-bar');
+		if (profileBar && !profileBar.contains(e.target)) {
+			profileBar.classList.remove('open');
+		}
+		
+		const modal = document.getElementById('visitor-reports-modal');
+		if (event.target == modal) {
+			closeVisitorReports();
+		}
+	});
+	</script>
+	
+</body>
+</html>

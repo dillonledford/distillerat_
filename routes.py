@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, jsonify, Response
+from flask import render_template, request, redirect, url_for, jsonify, Response, session
 from flask_login import login_required, logout_user, current_user
 from google import genai
 from dotenv import load_dotenv
@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 import markdown
 import os
 from elevenlabs.client import ElevenLabs
+import json
+import uuid
 
 load_dotenv()
 
@@ -38,25 +40,30 @@ def register_routes(app):
         if current_user.is_authenticated:
             from flask_dance.contrib.google import google
             sources = UserSource.query.filter_by(user_id=current_user.id).all()
+            report_count = Report.query.filter_by(user_id=current_user.id).count()
             google_connected = google.token is not None
             google_token = google.token.get("access_token") if google.token else None
             return render_template('dashboard.html', sources=sources, 
-                                 google_connected=google_connected,
-                                 google_token=google_token,
-                                 google_api_key=os.getenv('GOOGLE_API_KEY'))
+                                google_connected=google_connected,
+                                google_token=google_token,
+                                google_api_key=os.getenv('GOOGLE_API_KEY'),
+                                report_count=report_count)
+        # For visitors, just render the dashboard with visitor mode
         return render_template('dashboard.html')
 
     @app.route('/dashboard')
     @login_required
     def dashboard():
         sources = UserSource.query.filter_by(user_id=current_user.id).all()
+        report_count = Report.query.filter_by(user_id=current_user.id).count()
         from flask_dance.contrib.google import google
         google_connected = google.token is not None
         google_token = google.token.get("access_token") if google.token else None
         return render_template('dashboard.html', sources=sources,
-                             google_connected=google_connected,
-                             google_token=google_token,
-                             google_api_key=os.getenv('GOOGLE_API_KEY'))
+                            google_connected=google_connected,
+                            google_token=google_token,
+                            google_api_key=os.getenv('GOOGLE_API_KEY'),
+                            report_count=report_count)
 
     @app.route('/add_source', methods=["POST"])
     @login_required
@@ -84,20 +91,51 @@ def register_routes(app):
             db.session.commit()
         return redirect(url_for('dashboard'))
 
-    @app.route('/visitor_report', methods=["POST"])
+    @app.route('/visitor_report', methods=["POST", "GET"])
     def visitor_report():
+        # Check if this is a request to load a saved report
+        report_id = request.args.get('load')
+        if report_id:
+            # This is a GET request to load a saved report
+            # The actual report data will be loaded from localStorage on the client side
+            return render_template('visitor_report_view.html', report_id=report_id)
+        
+        # This is a POST request to generate a new report
         repo = request.form.get("repo")
         timeframe = int(request.form.get("timeframe", 7))
         output = None
+        
         if repo:
             url = f"https://github.com/{repo}/releases.atom"
             items = fetch_feed(url, days=timeframe)
             if items:
                 combined = "\n\n".join(items)
-                output = markdown.markdown(get_gemini_response(combined, PROMPTS["full_briefing"], "full_briefing"))
+                raw = get_gemini_response(combined, PROMPTS["full_briefing"], "full_briefing")
+                
+                if raw.startswith("Error generating report:"):
+                    return render_template('error.html')
+                
+                output = markdown.markdown(raw)
+                
+                # Create a visitor report object to pass to template (not saved to DB)
+                visitor_report = {
+                    'id': str(uuid.uuid4()),  # Generate unique ID for local storage
+                    'content': raw,
+                    'report_type': 'full_briefing',
+                    'time_range': str(timeframe),
+                    'created_at': datetime.utcnow(),
+                    'repo': repo,
+                    'is_visitor': True
+                }
+                
+                return render_template('report.html', 
+                                     output=output, 
+                                     saved_report=visitor_report,
+                                     is_visitor=True)
             else:
                 output = "No releases found for that repo in the selected timeframe."
-        return render_template('report.html', output=output)
+        
+        return render_template('report.html', output=output, is_visitor=True)
 
     @app.route('/report', methods=["POST"])
     @login_required
@@ -138,11 +176,14 @@ def register_routes(app):
             db.session.add(report)
             db.session.commit()
             
+            report_count = Report.query.filter_by(user_id=current_user.id).count()
+            
             # Pass the newly created report to the template
-            return render_template('report.html', output=output, saved_report=report)
+            return render_template('report.html', output=output, saved_report=report, report_count=report_count)
         else:
             output = "No content found for the selected timeframe."
-            return render_template('report.html', output=output)
+            report_count = Report.query.filter_by(user_id=current_user.id).count()
+            return render_template('report.html', output=output, report_count=report_count)
 
     @app.route('/reports')
     @login_required
@@ -159,15 +200,27 @@ def register_routes(app):
         if report.user_id != current_user.id:
             return redirect(url_for('dashboard'))
         output = markdown.markdown(report.content)
-        return render_template('report.html', output=output, saved_report=report)
+        report_count = Report.query.filter_by(user_id=current_user.id).count()
+        return render_template('report.html', output=output, saved_report=report, report_count=report_count)
 
-    # NEW TTS ENDPOINT
-    @app.route('/tts/<int:report_id>', methods=["POST"])
-    @login_required
+    # TTS endpoint - now supports both authenticated and visitor reports
+    @app.route('/tts/<report_id>', methods=["POST"])
     def generate_tts(report_id):
-        report = Report.query.get_or_404(report_id)
-        if report.user_id != current_user.id:
-            return jsonify({"error": "Unauthorized"}), 403
+        # Try to get authenticated report first
+        if current_user.is_authenticated:
+            try:
+                report = Report.query.get_or_404(int(report_id))
+                if report.user_id != current_user.id:
+                    return jsonify({"error": "Unauthorized"}), 403
+                text_content = report.content
+            except:
+                return jsonify({"error": "Report not found"}), 404
+        else:
+            # For visitors, get content from request body
+            data = request.get_json() or {}
+            text_content = data.get('content')
+            if not text_content:
+                return jsonify({"error": "No content provided"}), 400
         
         try:
             # Get voice_id from request, default to George
@@ -177,10 +230,10 @@ def register_routes(app):
             client = ElevenLabs(api_key=os.getenv('ELEVENLABS_API_KEY'))
             
             # Convert report content (remove markdown formatting for better TTS)
-            text_content = report.content.replace('#', '').replace('*', '').replace('_', '')
+            clean_text = text_content.replace('#', '').replace('*', '').replace('_', '')
             
             audio = client.text_to_speech.convert(
-                text=text_content,
+                text=clean_text,
                 voice_id=voice_id,
                 model_id="eleven_turbo_v2_5",
                 output_format="mp3_44100_128"
