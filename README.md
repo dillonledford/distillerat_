@@ -23,9 +23,10 @@ distillerat_ connects your GitHub repositories and Google Drive folders and uses
 |-------|-----------|
 | Backend | Python, Flask, SQLAlchemy, SQLite |
 | Auth | GitHub OAuth, Google OAuth 2.0 (Flask-Dance) |
-| APIs | GitHub REST API, GitHub Atom/RSS, Google Drive API v3, Google Docs API v1, Google Picker API |
+| APIs | GitHub REST API, GitHub Atom/RSS, Google Drive API v3, Google Docs API v1, Google Picker API, ElevenLabs TTS API |
 | AI | Google Gemini API (gemini-2.5-flash, gemini-2.5-flash-lite) |
 | Frontend | HTML, CSS, Jinja2 |
+| Audio | ElevenLabs TTS API (elevenlabs-python) |
 | Hosting | Render, Porkbun (distillerat.com) |
 
 ---
@@ -37,6 +38,7 @@ distillerat_ connects your GitHub repositories and Google Drive folders and uses
 - Monitor GitHub repos for releases and commits
 - Read Google Docs content and summarize with AI
 - Save and revisit reports with source labels and date ranges
+- Listen to reports via text-to-speech with selectable voices (powered by ElevenLabs)
 - Mobile responsive
 
 ---
