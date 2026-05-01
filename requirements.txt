@@ -9,3 +9,4 @@ google-genai==1.10.0
 gunicorn==23.0.0
 feedparser==6.0.11
 Markdown==3.7
+elevenlabs==2.45.0
