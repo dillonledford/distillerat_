@@ -24,24 +24,22 @@ app.config['SESSION_COOKIE_NAME'] = 'distillerat_session'
 app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') != 'development'
 
 
-
 ## Keep Render Site Alive - No Spindown --- Script Start ---
 
-# def keep_alive():
-    # time.sleep(30)  # wait for server to start
-    # while True:
-        # try:
-            # requests.get('https://distillerat.com/')
-        # except:
-            # pass
-        # time.sleep(14 * 60)  # ping every 14 minutes - Render spiondown is 15 minutes
+def keep_alive():
+    time.sleep(30)  # wait for server to start
+    while True:
+        try:
+            requests.get('https://distillerat.com/')
+        except:
+            pass
+        time.sleep(14 * 60)  # ping every 14 minutes - Render spiondown is 15 minutes
 
-# if os.getenv('FLASK_ENV') != 'development':
-    # thread = threading.Thread(target=keep_alive, daemon=True)
-    # thread.start()
+if os.getenv('FLASK_ENV') != 'development':
+    thread = threading.Thread(target=keep_alive, daemon=True)
+    thread.start()
 
 ## Keep Render Site Alive - No Spindown --- Script End ---
-
 
 
 db.init_app(app)
