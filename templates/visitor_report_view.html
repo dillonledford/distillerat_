@@ -22,21 +22,25 @@
 	<img src="/static/distill_logo2.png" class="logo-centered">
 	<h1 class="page-title">distillerat<span class="cursor">_</span></h1>
 
-	<div class="tts-controls">
-		<button id="tts-button" class="tts-button">
-			<span id="tts-icon" onclick="toggleTTS(event)">🔊</span> 
-			<span id="tts-text" onclick="toggleTTS(event)">Listen to Report</span>
-			<span class="voice-toggle" onclick="toggleSettings(event)">▾</span>
-		</button>
-		<div id="voice-settings" class="voice-settings">
-			<label for="voice-select">Voice:</label>
-			<select id="voice-select" onchange="saveVoicePreference()">
-				<option value="JBFqnCBsd6RMkjVDRZzb">George (Male)</option>
-				<option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
-			</select>
-		</div>
-		<div id="tts-status" class="tts-status"></div>
-	</div>
+
+<!-- TTS DISABLED -->
+	<!-- <div class="tts-controls"> -->
+		<!-- <button id="tts-button" class="tts-button"> -->
+			<!-- <span id="tts-icon" onclick="toggleTTS(event)">🔊</span>  -->
+			<!-- <span id="tts-text" onclick="toggleTTS(event)">Listen to Report</span> -->
+			<!-- <span class="voice-toggle" onclick="toggleSettings(event)">▾</span> -->
+		<!-- </button> -->
+		<!-- <div id="voice-settings" class="voice-settings"> -->
+			<!-- <label for="voice-select">Voice:</label> -->
+			<!-- <select id="voice-select" onchange="saveVoicePreference()"> -->
+				<!-- <option value="JBFqnCBsd6RMkjVDRZzb">George (Male)</option> -->
+				<!-- <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option> -->
+			<!-- </select> -->
+		<!-- </div> -->
+		<!-- <div id="tts-status" class="tts-status"></div> -->
+	<!-- </div> -->
+
+
 
 	<div id="report-output" class="report-content"></div>
 	
@@ -119,123 +123,127 @@
 		return html;
 	}
 	
-	// TTS functionality
-	let audio = null;
-	let isPlaying = false;
-	let isLoading = false;
 
-	function loadVoicePreference() {
-		const savedVoice = localStorage.getItem('tts_voice_preference');
-		if (savedVoice) {
-			document.getElementById('voice-select').value = savedVoice;
-		}
-	}
+	// TTS functionality DISABLED
+	
+	<!-- let audio = null; -->
+	<!-- let isPlaying = false; -->
+	<!-- let isLoading = false; -->
 
-	function saveVoicePreference() {
-		const voiceSelect = document.getElementById('voice-select');
-		localStorage.setItem('tts_voice_preference', voiceSelect.value);
-	}
+	<!-- function loadVoicePreference() { -->
+		<!-- const savedVoice = localStorage.getItem('tts_voice_preference'); -->
+		<!-- if (savedVoice) { -->
+			<!-- document.getElementById('voice-select').value = savedVoice; -->
+		<!-- } -->
+	<!-- } -->
 
-	function toggleSettings(e) {
-		e.stopPropagation();
-		const settingsPanel = document.getElementById('voice-settings');
-		settingsPanel.classList.toggle('open');
-	}
+	<!-- function saveVoicePreference() { -->
+		<!-- const voiceSelect = document.getElementById('voice-select'); -->
+		<!-- localStorage.setItem('tts_voice_preference', voiceSelect.value); -->
+	<!-- } -->
 
-	loadVoicePreference();
+	<!-- function toggleSettings(e) { -->
+		<!-- e.stopPropagation(); -->
+		<!-- const settingsPanel = document.getElementById('voice-settings'); -->
+		<!-- settingsPanel.classList.toggle('open'); -->
+	<!-- } -->
 
-	async function toggleTTS() {
-		if (!currentReport) return;
+	<!-- loadVoicePreference(); -->
+
+	<!-- async function toggleTTS() { -->
+		<!-- if (!currentReport) return; -->
 		
-		const button = document.getElementById('tts-button');
-		const icon = document.getElementById('tts-icon');
-		const text = document.getElementById('tts-text');
-		const status = document.getElementById('tts-status');
+		<!-- const button = document.getElementById('tts-button'); -->
+		<!-- const icon = document.getElementById('tts-icon'); -->
+		<!-- const text = document.getElementById('tts-text'); -->
+		<!-- const status = document.getElementById('tts-status'); -->
 
-		if (isLoading) return;
+		<!-- if (isLoading) return; -->
 
-		if (isPlaying) {
-			if (audio) {
-				audio.pause();
-				audio.currentTime = 0;
-				audio = null;
-			}
-			isPlaying = false;
-			icon.textContent = '🔊';
-			text.textContent = 'Listen to Report';
-			status.textContent = '';
-			return;
-		}
+		<!-- if (isPlaying) { -->
+			<!-- if (audio) { -->
+				<!-- audio.pause(); -->
+				<!-- audio.currentTime = 0; -->
+				<!-- audio = null; -->
+			<!-- } -->
+			<!-- isPlaying = false; -->
+			<!-- icon.textContent = '🔊'; -->
+			<!-- text.textContent = 'Listen to Report'; -->
+			<!-- status.textContent = ''; -->
+			<!-- return; -->
+		<!-- } -->
 
-		try {
-			isLoading = true;
-			button.disabled = true;
-			icon.textContent = '⏳';
-			text.textContent = 'Loading...';
-			status.textContent = 'Generating audio...';
+		<!-- try { -->
+			<!-- isLoading = true; -->
+			<!-- button.disabled = true; -->
+			<!-- icon.textContent = '⏳'; -->
+			<!-- text.textContent = 'Loading...'; -->
+			<!-- status.textContent = 'Generating audio...'; -->
 
-			const voiceId = document.getElementById('voice-select').value;
+			<!-- const voiceId = document.getElementById('voice-select').value; -->
 
-			const response = await fetch('/tts/' + reportId, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ 
-					voice_id: voiceId,
-					content: currentReport.content
-				})
-			});
+			<!-- const response = await fetch('/tts/' + reportId, { -->
+				<!-- method: 'POST', -->
+				<!-- headers: { -->
+					<!-- 'Content-Type': 'application/json' -->
+				<!-- }, -->
+				<!-- body: JSON.stringify({  -->
+					<!-- voice_id: voiceId, -->
+					<!-- content: currentReport.content -->
+				<!-- }) -->
+			<!-- }); -->
 
-			if (!response.ok) {
-				throw new Error('Failed to generate audio');
-			}
+			<!-- if (!response.ok) { -->
+				<!-- throw new Error('Failed to generate audio'); -->
+			<!-- } -->
 
-			const blob = await response.blob();
-			const audioUrl = URL.createObjectURL(blob);
+			<!-- const blob = await response.blob(); -->
+			<!-- const audioUrl = URL.createObjectURL(blob); -->
 			
-			audio = new Audio(audioUrl);
+			<!-- audio = new Audio(audioUrl); -->
 			
-			audio.onplay = () => {
-				isPlaying = true;
-				isLoading = false;
-				button.disabled = false;
-				icon.textContent = '⏸️';
-				text.textContent = 'Stop';
-				status.textContent = 'Playing...';
-			};
+			<!-- audio.onplay = () => { -->
+				<!-- isPlaying = true; -->
+				<!-- isLoading = false; -->
+				<!-- button.disabled = false; -->
+				<!-- icon.textContent = '⏸️'; -->
+				<!-- text.textContent = 'Stop'; -->
+				<!-- status.textContent = 'Playing...'; -->
+			<!-- }; -->
 
-			audio.onended = () => {
-				isPlaying = false;
-				icon.textContent = '🔊';
-				text.textContent = 'Listen to Report';
-				status.textContent = '';
-				URL.revokeObjectURL(audioUrl);
-				audio = null;
-			};
+			<!-- audio.onended = () => { -->
+				<!-- isPlaying = false; -->
+				<!-- icon.textContent = '🔊'; -->
+				<!-- text.textContent = 'Listen to Report'; -->
+				<!-- status.textContent = ''; -->
+				<!-- URL.revokeObjectURL(audioUrl); -->
+				<!-- audio = null; -->
+			<!-- }; -->
 
-			audio.onerror = () => {
-				isPlaying = false;
-				isLoading = false;
-				button.disabled = false;
-				icon.textContent = '🔊';
-				text.textContent = 'Listen to Report';
-				status.textContent = 'Error playing audio - Please try again later';
-				URL.revokeObjectURL(audioUrl);
-				audio = null;
-			};
+			<!-- audio.onerror = () => { -->
+				<!-- isPlaying = false; -->
+				<!-- isLoading = false; -->
+				<!-- button.disabled = false; -->
+				<!-- icon.textContent = '🔊'; -->
+				<!-- text.textContent = 'Listen to Report'; -->
+				<!-- status.textContent = 'Error playing audio - Please try again later'; -->
+				<!-- URL.revokeObjectURL(audioUrl); -->
+				<!-- audio = null; -->
+			<!-- }; -->
 
-			await audio.play();
+			<!-- await audio.play(); -->
 
-		} catch (error) {
-			console.error('TTS Error:', error);
-			isLoading = false;
-			button.disabled = false;
-			icon.textContent = '🔊';
-			text.textContent = 'Listen to Report';
-			status.textContent = 'Error: ' + error.message;
-		}
-	}
+		<!-- } catch (error) { -->
+			<!-- console.error('TTS Error:', error); -->
+			<!-- isLoading = false; -->
+			<!-- button.disabled = false; -->
+			<!-- icon.textContent = '🔊'; -->
+			<!-- text.textContent = 'Listen to Report'; -->
+			<!-- status.textContent = 'Error: ' + error.message; -->
+		<!-- } -->
+	<!-- } -->
+	
+
 	
 	// Visitor report management
 	function updateVisitorReportCount() {
@@ -299,14 +307,17 @@
 
 	// Close modal and settings when clicking outside
 	document.addEventListener('click', function(e) {
-		const voiceSettings = document.getElementById('voice-settings');
-		const ttsButton = document.getElementById('tts-button');
+	
+		<!-- const voiceSettings = document.getElementById('voice-settings'); -->
+		<!-- const ttsButton = document.getElementById('tts-button'); -->
 		
-		if (voiceSettings && ttsButton && 
-			!ttsButton.contains(e.target) && 
-			!voiceSettings.contains(e.target)) {
-			voiceSettings.classList.remove('open');
-		}
+		
+		<!-- TTS DISABLED -->
+		<!-- if (voiceSettings && ttsButton &&  -->
+			<!-- !ttsButton.contains(e.target) &&  -->
+			<!-- !voiceSettings.contains(e.target)) { -->
+			<!-- voiceSettings.classList.remove('open'); -->
+		<!-- } -->
 		
 		const profileBar = document.querySelector('.profile-bar');
 		if (profileBar && !profileBar.contains(e.target)) {
